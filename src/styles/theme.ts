@@ -5,6 +5,7 @@ export const theme = {
   headerBackground: "#222",
   headerText: "#fff",
   footerBackground: "#eee",
+  surfaceBackground: "#fff",
   fontFamily: `'Helvetica Neue', Helvetica, Arial, sans-serif`,
 };
 
