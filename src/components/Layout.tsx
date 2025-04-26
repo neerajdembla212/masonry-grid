@@ -12,7 +12,9 @@ export default function Layout({ children }: LayoutProps) {
         <Link to="/">Masonry Gallery</Link>
       </Header>
       <Main>{children}</Main>
-      <Footer></Footer>
+      <Footer>
+        <a href="https://www.pexels.com">Photos provided by Pexels</a>
+      </Footer>
     </>
   );
 }

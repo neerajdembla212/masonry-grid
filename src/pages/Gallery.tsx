@@ -1,5 +1,7 @@
+import { useEffect } from "react";
 import MasonryGrid from "../components/masonry-grid/MasonryGrid";
 import { Photo } from "../types/types";
+import { fetchPhotos } from "../services/pexelsApi";
 
 const dummyPhotos: Photo[] = [
   {
@@ -68,5 +70,12 @@ const dummyPhotos: Photo[] = [
   },
 ];
 export default function Gallery() {
-  return <MasonryGrid photos={dummyPhotos.concat(dummyPhotos)}></MasonryGrid>;
+  useEffect(() => {
+    async function fetchGalleryPhotos() {
+      const res = await fetchPhotos();
+    }
+
+    fetchGalleryPhotos();
+  }, []);
+  return <MasonryGrid photos={dummyPhotos}></MasonryGrid>;
 }

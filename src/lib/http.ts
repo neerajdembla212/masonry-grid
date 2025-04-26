@@ -1,4 +1,4 @@
-const BASE_URL = "https://api.pexels.com/";
+const BASE_URL = "/api/"; // proxied to https://api.pexels.com/v1 (Please check vite config)
 const API_KEY = import.meta.env.VITE_PEXELS_API_KEY;
 
 if (!API_KEY) {
