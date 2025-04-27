@@ -39,6 +39,7 @@ async function request<TBody = unknown, TResponse = any>(
     const errorText = await response.text();
     throw new Error(`Api error: ${response.status} ${errorText}`);
   }
+  
   return response.json();
 }
 
