@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { Photo } from "../../types/types";
+import { Photo } from "../../types/photo";
 import { Link } from "react-router-dom";
 import { routes } from "../../routes/routes";
 import Image from "../image/Image";

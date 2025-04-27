@@ -1,5 +1,5 @@
 import { styled } from "styled-components";
-import { Photo } from "../../types/types";
+import { Photo } from "../../types/photo";
 import PhotoCard from "../photo-card/PhotoCard";
 import {
   DESKTOP_COLUMN_COUNT,
