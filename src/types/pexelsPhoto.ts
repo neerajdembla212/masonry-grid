@@ -13,7 +13,7 @@ export interface PexelsPhoto {
   id: number;
   width: number;
   height: number;
-  url: string;
+  url?: string;
   photographer: string;
   photographer_url: string;
   photographer_id: number;

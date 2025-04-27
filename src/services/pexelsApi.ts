@@ -1,5 +1,5 @@
 import { http } from "../lib/http";
-import { PexelsPhoto } from "../types/pexels";
+import { PexelsPhoto } from "../types/pexelsPhoto";
 import { Photo } from "../types/photo";
 import { mapPexelsPhoto } from "./pexelsMapper";
 

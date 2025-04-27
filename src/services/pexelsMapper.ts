@@ -3,7 +3,7 @@ import {
   extractHeightFromPexelsUrl,
   extractWidthFromPexelsUrl,
 } from "../lib/utils";
-import { PexelsPhoto } from "../types/pexels";
+import { PexelsPhoto } from "../types/pexelsPhoto";
 import { Photo } from "../types/photo";
 
 // Following function maps the response from pexels (PexelsPhoto) to type that we use for rendering on UI layer (Photo)
