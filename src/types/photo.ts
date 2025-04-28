@@ -7,3 +7,10 @@ export interface Photo {
   width: number;
   loading?: "eager" | "lazy";
 }
+
+export type PositionedPhoto = Omit<Photo, "height" | "width"> & {
+  top: number;
+  left: number;
+  renderHeight: number;
+  renderWidth: number;
+}

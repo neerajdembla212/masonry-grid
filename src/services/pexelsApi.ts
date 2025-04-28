@@ -14,6 +14,7 @@ export async function fetchPexelsPhotos(): Promise<Photo[] | undefined> {
         mapPexelsPhoto(pexelsPhoto, index)
     );
     if (photos) {
+      console.log("photos ", photos);
       return photos;
     }
   } catch (err) {
