@@ -9,7 +9,7 @@ interface PhotoCardProps {
 }
 
 export default function PhotoCard({ photo }: PhotoCardProps) {
-  const { renderHeight, renderWidth, ...rest } = photo;
+  const { renderHeight, renderWidth, renderSrc, ...rest } = photo;
   return (
     <Card
       style={{
@@ -21,7 +21,12 @@ export default function PhotoCard({ photo }: PhotoCardProps) {
         to={routes.photoDetail.replace(":id", photo.id)}
         aria-label={`View details for ${photo.alt}`}
       >
-        <Image {...rest} height={renderHeight} width={renderWidth} />
+        <Image
+          {...rest}
+          height={renderHeight}
+          width={renderWidth}
+          src={renderSrc}
+        />
       </Link>
     </Card>
   );

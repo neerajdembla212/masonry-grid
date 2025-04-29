@@ -13,4 +13,5 @@ export type PositionedPhoto = Omit<Photo, "height" | "width"> & {
   left: number;
   renderHeight: number;
   renderWidth: number;
+  renderSrc: string;
 }

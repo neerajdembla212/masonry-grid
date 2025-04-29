@@ -1,14 +1,7 @@
-export const extractHeightFromPexelsUrl = (url: string): number | null => {
-  const match = url.match(/[?&]h=(\d+)/);
-  return match ? parseInt(match[1], 10) : null;
-};
-
-export const extractWidthFromPexelsUrl = (url: string): number | null => {
-  const match = url.match(/[?&]w=(\d+)/);
-  return match ? parseInt(match[1], 10) : null;
-};
-
 export const getMasonryColumnCount = (containerWidth: number): number => {
+  if (containerWidth >= 2048) {
+    return 4;
+  }
   if (containerWidth >= 1024) {
     return 3;
   }
