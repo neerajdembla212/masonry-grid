@@ -1,5 +1,3 @@
-// useResizeObserver.test.tsx
-
 import { act, renderHook } from "@testing-library/react";
 import { useResizeObserver } from "./useResizeObserver";
 import { vi, describe, beforeAll, it, expect } from "vitest";
@@ -26,7 +24,6 @@ describe("useResizeObserver", () => {
   it("should update width when ResizeObserver callback is triggered", () => {
     let resizeCallback: (entries: ResizeObserverEntry[]) => void = () => {};
 
-    // Custom mock to capture the callback
     globalThis.ResizeObserver = class {
       observe = vi.fn();
       disconnect = vi.fn();
@@ -40,7 +37,6 @@ describe("useResizeObserver", () => {
     } as React.RefObject<HTMLDivElement>;
     const { result } = renderHook(() => useResizeObserver(ref));
 
-    // Simulate ResizeObserver firing with a fake entry
     act(() => {
       resizeCallback([
         {

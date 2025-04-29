@@ -12,6 +12,7 @@ import {
 import { getMasonryColumnCount } from "../../lib/utils";
 import { useResizeObserver } from "../../hooks/useResizeObserver";
 import { debounce } from "lodash";
+import { useIntersectionObserver } from "../../hooks/useIntersectionObserver";
 
 interface MasonryGridProps {
   photos: Photo[];
@@ -29,6 +30,8 @@ export default function MasonryGrid({
   const [scrollTop, setScrollTop] = useState(0);
   const [viewportHeight, setViewPortHeight] = useState(0);
   const isTicking = useRef(false);
+  const bottomSentinelRef = useRef<HTMLDivElement>(null);
+  const topSentinelRef = useRef<HTMLDivElement>(null);
 
   // calculate container width based on screen size
   const { width: containerWidth, height: containerHeight } =
@@ -110,7 +113,14 @@ export default function MasonryGrid({
       positionedPhotos,
       totalHeight,
     };
-  }, [gridColumnCount, photos, viewportHeight, scrollTop, containerWidth, containerHeight]);
+  }, [
+    gridColumnCount,
+    photos,
+    viewportHeight,
+    scrollTop,
+    containerWidth,
+    containerHeight,
+  ]);
 
   const handleScroll = useCallback((event: React.UIEvent<HTMLDivElement>) => {
     const scrollElement = event.currentTarget;
@@ -126,17 +136,35 @@ export default function MasonryGrid({
   }, []);
 
   // Until now the virtual rendering, re-calculation on scroll is ready, now we detect onReachEnd during scroll and fetch more photos
-  const debouncedOnReachEnd = useMemo(() => {
-    return debounce(() => {
+  const debouncedOnReachEnd = useRef(
+    debounce(() => {
       onReachEnd?.();
-    }, 300);
-  }, [onReachEnd]);
+    }, 300)
+  ).current;
 
-  const debouncedOnReachStart = useMemo(() => {
-    return debounce(() => {
+  const debouncedOnReachStart = useRef(
+    debounce(() => {
       onReachStart?.();
-    }, 300);
-  }, [onReachStart]);
+    }, 300)
+  ).current;
+
+  useIntersectionObserver<HTMLDivElement>(
+    debouncedOnReachEnd,
+    bottomSentinelRef,
+    {
+      rootRef: scrollContainerRef,
+      rootMargin: "20%",
+    }
+  );
+
+  useIntersectionObserver<HTMLDivElement>(
+    debouncedOnReachStart,
+    topSentinelRef,
+    {
+      rootRef: scrollContainerRef,
+      rootMargin: "20%",
+    }
+  );
 
   return (
     <GridScrollWrapper ref={scrollContainerRef} onScroll={handleScroll}>
@@ -148,11 +176,13 @@ export default function MasonryGrid({
         {0.2 * containerWidth}, scrollBottomOffset:
         {scrollTop + viewportHeight}
       </div>
+      <Sentinel ref={topSentinelRef} />
       <Gridwrapper ref={containerRef} style={{ height: totalHeight }}>
         {positionedPhotos.map((photo) => (
           <PhotoCard key={photo.id} photo={photo} />
         ))}
       </Gridwrapper>
+      <Sentinel ref={bottomSentinelRef} />
     </GridScrollWrapper>
   );
 }
@@ -164,4 +194,10 @@ const Gridwrapper = styled.div`
 const GridScrollWrapper = styled.div`
   height: 100vh;
   overflow-y: auto;
+`;
+
+const Sentinel = styled.div`
+  height: 1px;
+  width: 100%;
+  border: 1px solid;
 `;
