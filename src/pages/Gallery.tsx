@@ -2,7 +2,21 @@ import MasonryGrid from "../components/masonry-grid/MasonryGrid";
 import { useFetchPhotos } from "../hooks/useFetchPhotos";
 
 export default function Gallery() {
-  const photos = useFetchPhotos();
+  const { photos, incrementPage, decrementPage, page } = useFetchPhotos();
 
-  return <MasonryGrid photos={photos}></MasonryGrid>;
+  if (!photos.length) {
+    return <div>Loading Photos...</div>;
+  }
+  return (
+    <>
+    <div style={{ position: "fixed", zIndex: 10, top: 10,color: "red" }}> 
+      page: {page}
+    </div>
+    <MasonryGrid
+      photos={photos}
+      onReachEnd={incrementPage}
+      onReachStart={decrementPage}
+      ></MasonryGrid>
+      </>
+  );
 }

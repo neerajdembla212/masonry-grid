@@ -1,16 +1,29 @@
 import { styled } from "styled-components";
 import { Photo, PositionedPhoto } from "../../types/photo";
 import PhotoCard from "../photo-card/PhotoCard";
-import { useCallback, useMemo, useRef, useState, useLayoutEffect } from "react";
+import {
+  useCallback,
+  useMemo,
+  useRef,
+  useState,
+  useLayoutEffect,
+  useEffect,
+} from "react";
 import { getMasonryColumnCount } from "../../lib/utils";
 import { useResizeObserver } from "../../hooks/useResizeObserver";
+import { debounce } from "lodash";
 
 interface MasonryGridProps {
   photos: Photo[];
-  columnGap?: number;
+  onReachEnd?: () => void;
+  onReachStart?: () => void;
 }
 
-export default function MasonryGrid({ photos }: MasonryGridProps) {
+export default function MasonryGrid({
+  photos,
+  onReachEnd,
+  onReachStart,
+}: MasonryGridProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [scrollTop, setScrollTop] = useState(0);
@@ -18,19 +31,22 @@ export default function MasonryGrid({ photos }: MasonryGridProps) {
   const isTicking = useRef(false);
 
   // calculate container width based on screen size
-  const containerWidth = useResizeObserver<HTMLDivElement>(containerRef);
+  const { width: containerWidth, height: containerHeight } =
+    useResizeObserver<HTMLDivElement>(containerRef);
 
+  // decide on number of columns to render based on containerWidth
   const gridColumnCount = useMemo(() => {
     return getMasonryColumnCount(containerWidth);
   }, [containerWidth]);
-  
+
+  // setViewport height correctly before browser paint
   useLayoutEffect(() => {
     if (scrollContainerRef.current) {
       setViewPortHeight(scrollContainerRef.current.clientHeight);
     }
   });
 
-  // once container width is final the calculate top and left of each photo relative to the container
+  // once container width, column number is final the calculate top and left of each photo relative to the container and keep track of each column height progressively
   const { positionedPhotos, totalHeight } = useMemo(() => {
     if (gridColumnCount === 0) {
       return {
@@ -41,7 +57,7 @@ export default function MasonryGrid({ photos }: MasonryGridProps) {
     // initialising variables
     const columnGap = 16; //px
     const rowGap = 16; //px
-    const buffer = Math.floor(0.1 * containerWidth); //px
+    const buffer = Math.floor(0.1 * containerHeight); //px
     const containerInnerWidth =
       containerWidth - columnGap * (gridColumnCount - 1); // This is the width available for our columns
     const columnWidth = Math.floor(containerInnerWidth / gridColumnCount); // This column width will also be the render width of photos
@@ -94,7 +110,7 @@ export default function MasonryGrid({ photos }: MasonryGridProps) {
       positionedPhotos,
       totalHeight,
     };
-  }, [gridColumnCount, photos, viewportHeight, scrollTop]);
+  }, [gridColumnCount, photos, viewportHeight, scrollTop, containerWidth, containerHeight]);
 
   const handleScroll = useCallback((event: React.UIEvent<HTMLDivElement>) => {
     const scrollElement = event.currentTarget;
@@ -109,10 +125,30 @@ export default function MasonryGrid({ photos }: MasonryGridProps) {
     }
   }, []);
 
+  // Until now the virtual rendering, re-calculation on scroll is ready, now we detect onReachEnd during scroll and fetch more photos
+  const debouncedOnReachEnd = useMemo(() => {
+    return debounce(() => {
+      onReachEnd?.();
+    }, 300);
+  }, [onReachEnd]);
+
+  const debouncedOnReachStart = useMemo(() => {
+    return debounce(() => {
+      onReachStart?.();
+    }, 300);
+  }, [onReachStart]);
+
   return (
     <GridScrollWrapper ref={scrollContainerRef} onScroll={handleScroll}>
+      <div style={{ position: "fixed", zIndex: 10, color: "red" }}>
+        viewportHeight: {viewportHeight} , gridColumnCount: {gridColumnCount} ,
+        scrollTop: {scrollTop} , containerHeight: {containerWidth} ,
+        containerWidth: {containerWidth} , totalHeight: {totalHeight} ,
+        bottomThreshold: {0.2 * containerWidth}, topThreshold:
+        {0.2 * containerWidth}, scrollBottomOffset:
+        {scrollTop + viewportHeight}
+      </div>
       <Gridwrapper ref={containerRef} style={{ height: totalHeight }}>
-        Width: {containerWidth}
         {positionedPhotos.map((photo) => (
           <PhotoCard key={photo.id} photo={photo} />
         ))}

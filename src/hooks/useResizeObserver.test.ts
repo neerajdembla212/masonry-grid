@@ -11,7 +11,7 @@ describe("useResizeObserver", () => {
       observe = vi.fn();
       disconnect = vi.fn();
       unobserve = vi.fn();
-    } as any;
+    };
   });
 
   it("should initialize width to 0", () => {
@@ -20,7 +20,7 @@ describe("useResizeObserver", () => {
     } as React.RefObject<HTMLDivElement>;
     const { result } = renderHook(() => useResizeObserver(ref));
 
-    expect(result.current).toBe(0);
+    expect(result.current).toStrictEqual({ width: 0, height: 0 });
   });
 
   it("should update width when ResizeObserver callback is triggered", () => {
@@ -44,11 +44,11 @@ describe("useResizeObserver", () => {
     act(() => {
       resizeCallback([
         {
-          contentRect: { width: 250 },
+          contentRect: { width: 250, height: 300 },
         } as ResizeObserverEntry,
       ]);
     });
 
-    expect(result.current).toBe(250);
+    expect(result.current).toStrictEqual({ width: 250, height: 300 });
   });
 });

@@ -4,15 +4,21 @@ import { fetchPexelsPhotos } from "../services/pexelsApi";
 
 export const useFetchPhotos = () => {
   const [photos, setPhotos] = useState<Photo[]>([]);
+  const [page, setPage] = useState(0);
+  const [isFetching, setIsFetching] = useState(false);
 
   useEffect(() => {
     let ignore = false; // using ignore for race conditions (if any)
 
     async function fetchPhotos() {
-      const photos = await fetchPexelsPhotos();
+      setIsFetching(true);
+      const photos = await fetchPexelsPhotos({
+        page,
+      });
       if (!ignore && photos) {
         setPhotos(photos);
       }
+      setIsFetching(false);
     }
 
     fetchPhotos();
@@ -20,7 +26,19 @@ export const useFetchPhotos = () => {
     return () => {
       ignore = true;
     };
-  }, []);
+  }, [page]);
 
-  return photos;
+  const incrementPage = (count: number = 1) => {
+    if (!isFetching) {
+      setPage((p) => p + count);
+    }
+  };
+
+  const decrementPage = (count: number = 1) => {
+    if (!isFetching && page > 0) {
+      setPage((p) => p - count);
+    }
+  };
+
+  return { photos, incrementPage, decrementPage, page };
 };

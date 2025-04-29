@@ -11,15 +11,14 @@ interface RequestOptions<TBody = unknown>
   extends Omit<RequestInit, "body" | "method"> {
   method?: HttpMethod;
   body?: TBody;
-  queryParam?: Record<string, string | number>;
+  queryParams?: Record<string, string | number>;
 }
 
 async function request<TBody = unknown, TResponse = any>(
   endpoint: string,
   options: RequestOptions<TBody>
 ): Promise<TResponse> {
-  const { method = "GET", headers, body } = options;
-
+  const { method = "GET", headers, body, queryParams } = options;
   const requestConfig: RequestInit = {
     method,
     headers: {
@@ -29,17 +28,29 @@ async function request<TBody = unknown, TResponse = any>(
     },
   };
 
+  let url = `${BASE_URL}${endpoint}`;
+
+  if (queryParams && Object.entries(queryParams).length > 0) {
+    const searchParams = new URLSearchParams();
+    for (const [key, value] of Object.entries(queryParams)) {
+      searchParams.set(key, String(value));
+    }
+
+    url += `?${searchParams.toString()}`;
+  }
+
+
   if (body) {
     requestConfig.body = JSON.stringify(body);
   }
 
-  const response = await fetch(`${BASE_URL}${endpoint}`, requestConfig);
+  const response = await fetch(url, requestConfig);
 
   if (!response.ok) {
     const errorText = await response.text();
     throw new Error(`Api error: ${response.status} ${errorText}`);
   }
-  
+
   return response.json();
 }
 

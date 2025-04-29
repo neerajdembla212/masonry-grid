@@ -3,10 +3,15 @@ import { PexelsPhoto } from "../types/pexelsPhoto";
 import { Photo } from "../types/photo";
 import { mapPexelsPhoto } from "./pexelsMapper";
 
-export async function fetchPexelsPhotos(): Promise<Photo[] | undefined> {
+export async function fetchPexelsPhotos(
+  queryParams?: Record<string, string | number>
+): Promise<Photo[] | undefined> {
   try {
     const { photos: pexelsPhotos } = await http.get<{ photos: PexelsPhoto[] }>(
-      "curated"
+      "curated",
+      {
+        queryParams,
+      }
     );
 
     const photos = (pexelsPhotos ?? []).map(
