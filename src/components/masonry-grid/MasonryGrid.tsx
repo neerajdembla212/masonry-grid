@@ -7,12 +7,12 @@ import {
   useRef,
   useState,
   useLayoutEffect,
-  useEffect,
 } from "react";
 import { getMasonryColumnCount } from "../../lib/utils";
 import { useResizeObserver } from "../../hooks/useResizeObserver";
 import { debounce } from "lodash";
 import { useIntersectionObserver } from "../../hooks/useIntersectionObserver";
+import { PHOTO_VISIBLE_RATIO } from "../../config/config";
 
 interface MasonryGridProps {
   photos: Photo[];
@@ -35,7 +35,7 @@ export default function MasonryGrid({
 
   // calculate container width based on screen size
   const { width: containerWidth, height: containerHeight } =
-    useResizeObserver<HTMLDivElement>(containerRef);
+    useResizeObserver<HTMLDivElement>(scrollContainerRef);
 
   // decide on number of columns to render based on containerWidth
   const gridColumnCount = useMemo(() => {
@@ -113,14 +113,22 @@ export default function MasonryGrid({
       positionedPhotos,
       totalHeight,
     };
-  }, [
-    gridColumnCount,
-    photos,
-    viewportHeight,
-    scrollTop,
-    containerWidth,
-    containerHeight,
-  ]);
+  }, [gridColumnCount, photos, viewportHeight, containerWidth, containerHeight]);
+
+  // once we have calculations for all photos in positioned photos, we decide the virtual rendering window based on these calculations
+
+  const visiblePhotos = useMemo(() => {
+    const buffer = Math.floor(0.1 * viewportHeight);
+    const visibleStart = scrollTop - buffer;
+    const visibleEnd = scrollTop + viewportHeight + buffer;
+
+    return positionedPhotos.filter((photo) => {
+      const allowedPhotoHeightInWindow = Math.floor(PHOTO_VISIBLE_RATIO * photo.renderHeight);
+      const photoOffsetInWindow = photo.top + allowedPhotoHeightInWindow;
+
+      return  photoOffsetInWindow >= visibleStart && photoOffsetInWindow <= visibleEnd;
+    });
+  }, [positionedPhotos, scrollTop, viewportHeight]);
 
   const handleScroll = useCallback((event: React.UIEvent<HTMLDivElement>) => {
     const scrollElement = event.currentTarget;
@@ -178,7 +186,7 @@ export default function MasonryGrid({
       </div>
       <Sentinel ref={topSentinelRef} />
       <Gridwrapper ref={containerRef} style={{ height: totalHeight }}>
-        {positionedPhotos.map((photo) => (
+        {visiblePhotos.map((photo) => (
           <PhotoCard key={photo.id} photo={photo} />
         ))}
       </Gridwrapper>
