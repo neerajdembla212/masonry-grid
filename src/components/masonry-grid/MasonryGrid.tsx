@@ -1,11 +1,17 @@
 import { styled } from "styled-components";
 import { Photo } from "../../types/photo";
 import PhotoCard from "../photo-card/PhotoCard";
-import { useCallback, useMemo, useRef, useState, useLayoutEffect } from "react";
+import {
+  useMemo,
+  useRef,
+  useState,
+  useLayoutEffect,
+  useEffect,
+} from "react";
 import { getMasonryColumnCount } from "../../lib/utils";
 import { useResizeObserver } from "../../hooks/useResizeObserver";
-import { debounce } from "lodash";
-import { useIntersectionObserver } from "../../hooks/useIntersectionObserver";
+import debounce from "lodash.debounce";
+import throttle from "lodash.throttle";
 import { PHOTO_VISIBLE_RATIO } from "../../config/config";
 import { useCalculateMasonryGridLayout } from "../../hooks/useCalculateMasonryGridLayout";
 
@@ -26,9 +32,7 @@ export default function MasonryGrid({
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [scrollTop, setScrollTop] = useState(0);
   const [viewportHeight, setViewPortHeight] = useState(0);
-  const isTicking = useRef(false);
-  const bottomSentinelRef = useRef<HTMLDivElement>(null);
-  const topSentinelRef = useRef<HTMLDivElement>(null);
+  const prevScrollTopRef = useRef(0);
 
   // calculate container width based on screen size
   const { width: containerWidth } =
@@ -58,7 +62,7 @@ export default function MasonryGrid({
   // once we have calculations for all photos in positioned photos, we decide the virtual rendering window based on these calculations
 
   const visiblePhotos = useMemo(() => {
-    const buffer = Math.floor(0.1 * viewportHeight);
+    const buffer = Math.floor(0.3 * viewportHeight);
     const visibleStart = scrollTop - buffer;
     const visibleEnd = scrollTop + viewportHeight + buffer;
 
@@ -74,18 +78,15 @@ export default function MasonryGrid({
     });
   }, [allPositionedPhotos, scrollTop, viewportHeight]);
 
-  const handleScroll = useCallback((event: React.UIEvent<HTMLDivElement>) => {
-    const scrollElement = event.currentTarget;
-
-    if (!isTicking.current) {
-      isTicking.current = true;
-      requestAnimationFrame(() => {
+  const handleScroll = useMemo(
+    () =>
+      throttle((event: React.UIEvent<HTMLDivElement>) => {
+        const scrollElement = event.currentTarget;
         setScrollTop(scrollElement.scrollTop);
         setViewPortHeight(scrollElement.clientHeight);
-        isTicking.current = false;
-      });
-    }
-  }, []);
+      }, 50),
+    []
+  );
 
   // Until now the virtual rendering, re-calculation on scroll is ready, now we detect onReachEnd during scroll and fetch more photos
   const debouncedOnReachEnd = useRef(
@@ -100,23 +101,37 @@ export default function MasonryGrid({
     }, 300)
   ).current;
 
-  useIntersectionObserver<HTMLDivElement>(
-    debouncedOnReachEnd,
-    bottomSentinelRef,
-    {
-      rootRef: scrollContainerRef,
-      rootMargin: "20%",
+  // detect bottom and top reached
+  useEffect(() => {
+    if (!viewportHeight || !totalHeight) {
+      return;
     }
-  );
+    const scrollBottom = scrollTop + viewportHeight;
+    const threshold = Math.floor(0.3 * viewportHeight);
 
-  useIntersectionObserver<HTMLDivElement>(
-    debouncedOnReachStart,
-    topSentinelRef,
-    {
-      rootRef: scrollContainerRef,
-      rootMargin: "20%",
+    const prevScrollTop = prevScrollTopRef.current;
+
+    const isScrollingDown = scrollTop > prevScrollTop;
+    const isScrollingUp = scrollTop < prevScrollTop;
+
+    const nearBottom = scrollBottom + threshold >= totalHeight;
+    const nearTop = scrollTop < threshold;
+
+    prevScrollTopRef.current = scrollTop;
+
+    if (isScrollingDown && nearBottom) {
+      debouncedOnReachEnd?.();
     }
-  );
+    if (isScrollingUp && nearTop) {
+      debouncedOnReachStart?.();
+    }
+  }, [
+    scrollTop,
+    viewportHeight,
+    totalHeight,
+    debouncedOnReachEnd,
+    debouncedOnReachStart,
+  ]);
 
   return (
     <GridScrollWrapper ref={scrollContainerRef} onScroll={handleScroll}>
@@ -128,13 +143,16 @@ export default function MasonryGrid({
         {0.2 * containerWidth}, scrollBottomOffset:
         {scrollTop + viewportHeight}
       </div>
-      <Sentinel ref={topSentinelRef} />
       <Gridwrapper ref={containerRef} style={{ height: totalHeight }}>
+        <ScrollTop
+          style={{
+            top: scrollTop,
+          }}
+        />
         {visiblePhotos.map((photo) => (
           <PhotoCard key={photo.id} photo={photo} />
         ))}
       </Gridwrapper>
-      <Sentinel ref={bottomSentinelRef} />
     </GridScrollWrapper>
   );
 }
@@ -148,8 +166,10 @@ const GridScrollWrapper = styled.div`
   overflow-y: auto;
 `;
 
-const Sentinel = styled.div`
+const ScrollTop = styled.div`
   height: 1px;
   width: 100%;
   border: 1px solid;
+  position: fixed;
+  z-index: 10;
 `;

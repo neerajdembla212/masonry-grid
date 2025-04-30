@@ -3,12 +3,13 @@ import { PositionedPhoto } from "../../types/photo";
 import { Link } from "react-router-dom";
 import { routes } from "../../routes/routes";
 import Image from "../image/Image";
+import { memo } from "react";
 
 interface PhotoCardProps {
   photo: PositionedPhoto;
 }
 
-export default function PhotoCard({ photo }: PhotoCardProps) {
+function PhotoCard({ photo }: PhotoCardProps) {
   const { renderHeight, renderWidth, renderSrc, ...rest } = photo;
   return (
     <Card
@@ -39,5 +40,9 @@ const Card = styled.div`
   .photo-card-image {
     object-fit: cover;
     border-radius: 5px;
+    will-change: transform, opacity;
+    transition: opacity 0.15s ease;
   }
 `;
+
+export default memo(PhotoCard);
