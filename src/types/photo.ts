@@ -1,17 +1,11 @@
-export interface Photo {
-  id: string;
-  src: string;
+import { LayoutAttributes } from "./layout-attributes";
+import { MasonryElement } from "./masonry-element";
+
+export interface Photo extends MasonryElement {
   alt: string;
   photographer?: string;
-  height: number;
-  width: number;
   loading?: "eager" | "lazy";
 }
 
-export type PositionedPhoto = Omit<Photo, "height" | "width"> & {
-  top: number;
-  left: number;
-  renderHeight: number;
-  renderWidth: number;
-  renderSrc: string;
-}
+export type PositionedPhoto = Omit<Photo, "height" | "width"> &
+  LayoutAttributes;

@@ -1,29 +1,26 @@
 import { styled } from "styled-components";
 import { Photo, PositionedPhoto } from "../../types/photo";
 import PhotoCard from "../photo-card/PhotoCard";
-import {
-  useCallback,
-  useMemo,
-  useRef,
-  useState,
-  useLayoutEffect,
-} from "react";
+import { useCallback, useMemo, useRef, useState, useLayoutEffect } from "react";
 import { getMasonryColumnCount } from "../../lib/utils";
 import { useResizeObserver } from "../../hooks/useResizeObserver";
 import { debounce } from "lodash";
 import { useIntersectionObserver } from "../../hooks/useIntersectionObserver";
 import { PHOTO_VISIBLE_RATIO } from "../../config/config";
+import { useCalculateMasonryGridLayout } from "../../hooks/useCalculateMasonryGridLayout";
 
 interface MasonryGridProps {
   photos: Photo[];
   onReachEnd?: () => void;
   onReachStart?: () => void;
+  gutter?: number;
 }
 
 export default function MasonryGrid({
   photos,
   onReachEnd,
   onReachStart,
+  gutter = 16,
 }: MasonryGridProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -34,7 +31,7 @@ export default function MasonryGrid({
   const topSentinelRef = useRef<HTMLDivElement>(null);
 
   // calculate container width based on screen size
-  const { width: containerWidth, height: containerHeight } =
+  const { width: containerWidth } =
     useResizeObserver<HTMLDivElement>(scrollContainerRef);
 
   // decide on number of columns to render based on containerWidth
@@ -50,70 +47,13 @@ export default function MasonryGrid({
   });
 
   // once container width, column number is final the calculate top and left of each photo relative to the container and keep track of each column height progressively
-  const { positionedPhotos, totalHeight } = useMemo(() => {
-    if (gridColumnCount === 0) {
-      return {
-        positionedPhotos: [],
-        totalHeight: 0,
-      };
-    }
-    // initialising variables
-    const columnGap = 16; //px
-    const rowGap = 16; //px
-    const buffer = Math.floor(0.1 * containerHeight); //px
-    const containerInnerWidth =
-      containerWidth - columnGap * (gridColumnCount - 1); // This is the width available for our columns
-    const columnWidth = Math.floor(containerInnerWidth / gridColumnCount); // This column width will also be the render width of photos
-    const virtualWindowTop = scrollTop - buffer;
-    const virtualWindowBottom = scrollTop + viewportHeight + buffer;
-    let columnHeights = new Array<number>(gridColumnCount).fill(0); // To keep track of all column heights, initiating columns with 0 height
-    let shortestColumnIndex = 0;
-    const positionedPhotos: PositionedPhoto[] = [];
-
-    for (const photo of photos) {
-      // calculate top based on column heights
-      // first we decide which column the photo will be placed in
-      const top = columnHeights[shortestColumnIndex];
-
-      const aspectRatio = photo.height / photo.width;
-      const renderHeight = Math.floor(aspectRatio * columnWidth);
-
-      // now we update the columnHeight using height of this photo
-      columnHeights[shortestColumnIndex] += renderHeight + rowGap;
-
-      // now we calculate left for the photo based on column width
-      const left = shortestColumnIndex * (columnWidth + columnGap);
-
-      // we also update the shortest column based on latest column heights
-      shortestColumnIndex = columnHeights.indexOf(Math.min(...columnHeights));
-
-      // now we build the url to render based on height and width we calculated
-      const renderSrc = `${photo.src}?auto=compress&cs=tinysrgb&h=${renderHeight}&w=${columnWidth}`;
-
-      // we decide if the photo is in the viewport for rendering
-      const photoBottomOffset = top + renderHeight; // offset of photo bottom relative to the container
-      const photoTopOffset = top; // offset of photo top relative to the container
-
-      if (
-        photoBottomOffset >= virtualWindowTop &&
-        photoTopOffset <= virtualWindowBottom
-      ) {
-        positionedPhotos.push({
-          ...photo,
-          top,
-          left,
-          renderHeight,
-          renderWidth: columnWidth,
-          renderSrc,
-        });
-      }
-    }
-    const totalHeight = Math.max(...columnHeights);
-    return {
-      positionedPhotos,
-      totalHeight,
-    };
-  }, [gridColumnCount, photos, viewportHeight, containerWidth, containerHeight]);
+  const { positionedElements: allPositionedPhotos, totalHeight } =
+    useCalculateMasonryGridLayout<Photo>({
+      containerWidth,
+      columnCount: gridColumnCount,
+      gutter,
+      elements: photos,
+    });
 
   // once we have calculations for all photos in positioned photos, we decide the virtual rendering window based on these calculations
 
@@ -122,13 +62,17 @@ export default function MasonryGrid({
     const visibleStart = scrollTop - buffer;
     const visibleEnd = scrollTop + viewportHeight + buffer;
 
-    return positionedPhotos.filter((photo) => {
-      const allowedPhotoHeightInWindow = Math.floor(PHOTO_VISIBLE_RATIO * photo.renderHeight);
+    return allPositionedPhotos.filter((photo) => {
+      const allowedPhotoHeightInWindow = Math.floor(
+        PHOTO_VISIBLE_RATIO * photo.renderHeight
+      );
       const photoOffsetInWindow = photo.top + allowedPhotoHeightInWindow;
 
-      return  photoOffsetInWindow >= visibleStart && photoOffsetInWindow <= visibleEnd;
+      return (
+        photoOffsetInWindow >= visibleStart && photoOffsetInWindow <= visibleEnd
+      );
     });
-  }, [positionedPhotos, scrollTop, viewportHeight]);
+  }, [allPositionedPhotos, scrollTop, viewportHeight]);
 
   const handleScroll = useCallback((event: React.UIEvent<HTMLDivElement>) => {
     const scrollElement = event.currentTarget;
