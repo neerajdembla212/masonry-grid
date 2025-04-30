@@ -1,5 +1,5 @@
 import { styled } from "styled-components";
-import { Photo, PositionedPhoto } from "../../types/photo";
+import { Photo } from "../../types/photo";
 import PhotoCard from "../photo-card/PhotoCard";
 import { useCallback, useMemo, useRef, useState, useLayoutEffect } from "react";
 import { getMasonryColumnCount } from "../../lib/utils";

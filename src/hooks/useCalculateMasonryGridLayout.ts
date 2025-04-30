@@ -1,4 +1,4 @@
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { LayoutAttributes } from "../types/layout-attributes";
 import { MasonryElement } from "../types/masonry-element";
 
@@ -13,6 +13,10 @@ export function useCalculateMasonryGridLayout<
   const layoutCache = useRef<Map<string, T & LayoutAttributes>>(new Map());
 
   const { containerWidth, elements, gutter, columnCount } = options;
+
+  useEffect(() => {
+    layoutCache.current.clear();
+  }, [containerWidth, columnCount]);
 
   return useMemo(() => {
     if (columnCount === 0) {
@@ -33,7 +37,19 @@ export function useCalculateMasonryGridLayout<
       // skip calculation if cache hit
       if (layoutCache.current.has(element.id)) {
         const cachedPositionedPhoto = layoutCache.current.get(element.id);
-        cachedPositionedPhoto && positionedElements.push(cachedPositionedPhoto);
+        if (cachedPositionedPhoto) {
+          positionedElements.push(cachedPositionedPhoto);
+          // calculate the column this photo belong to
+          const columnIndex = Math.floor(
+            cachedPositionedPhoto.left / (columnWidth + gutter)
+          );
+          columnHeights[columnIndex] = Math.max(
+            columnHeights[columnIndex],
+            cachedPositionedPhoto.top +
+              cachedPositionedPhoto.renderHeight +
+              gutter
+          );
+        }
         continue;
       }
       // calculate top based on column heights
