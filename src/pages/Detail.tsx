@@ -1,14 +1,21 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams } from "react-router-dom";
+import PhotoDetailContainer from "../components/photo-detail-container/PhotoDetailContainer";
+import styled from "styled-components";
 
-function Detail() {
+export default function Detail() {
   const { id } = useParams<{ id: string }>();
+  if (!id) {
+    return;
+  }
   return (
-    <div>
-      <h1>Photo Detail Page</h1>
-      <p>Photo ID: {id}</p>
-      <Link to="/">Back to Gallery</Link>
-    </div>
+    <PageWrapper>
+      <PhotoDetailContainer id={id} />;
+    </PageWrapper>
   );
 }
 
-export default Detail;
+const PageWrapper = styled.div`
+  width: 100dvw;
+  display: flex;
+  justify-content: center;
+`;

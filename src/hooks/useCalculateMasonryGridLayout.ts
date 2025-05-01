@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef } from "react";
 import { LayoutAttributes } from "../types/layout-attributes";
 import { MasonryElement } from "../types/masonry-element";
+import { buildImageUrl } from "../lib/utils";
 
 export function useCalculateMasonryGridLayout<
   T extends MasonryElement
@@ -69,7 +70,7 @@ export function useCalculateMasonryGridLayout<
       shortestColumnIndex = columnHeights.indexOf(Math.min(...columnHeights));
 
       // now we build the url to render based on height and width we calculated
-      const renderSrc = `${element.src}?auto=compress&cs=tinysrgb&h=${renderHeight}&w=${columnWidth}`;
+      const renderSrc = buildImageUrl(element.src, renderHeight, columnWidth);
       const positionedPhoto: T & LayoutAttributes = {
         ...element,
         top,

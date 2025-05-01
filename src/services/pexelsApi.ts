@@ -14,9 +14,8 @@ export async function fetchPexelsPhotos(
       }
     );
 
-    const photos = (pexelsPhotos ?? []).map(
-      (pexelsPhoto: PexelsPhoto, index: number) =>
-        mapPexelsPhoto(pexelsPhoto, index)
+    const photos = (pexelsPhotos ?? []).map((pexelsPhoto: PexelsPhoto) =>
+      mapPexelsPhoto(pexelsPhoto)
     );
     if (photos) {
       console.log("photos ", photos);
@@ -25,4 +24,20 @@ export async function fetchPexelsPhotos(
   } catch (err) {
     throw Error(`Api Error: Pexels get photos error ${err}`);
   }
+}
+
+export async function fetchPexelsPhotoDetail(
+  id: string
+): Promise<Photo | undefined> {
+  if (!id) {
+    return;
+  }
+  try {
+    const pexelsPhoto = await http.get<PexelsPhoto>(`photos/${id}`);
+    const photo = mapPexelsPhoto(pexelsPhoto, "portrait");
+    if (photo) {
+      console.log("photo ", photo);
+      return photo;
+    }
+  } catch (err) {}
 }

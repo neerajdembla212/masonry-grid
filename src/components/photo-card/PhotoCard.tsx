@@ -22,7 +22,7 @@ function PhotoCard({ photo, showPlaceholder }: PhotoCardProps) {
       style={{
         top: photo.top,
         left: photo.left,
-        containIntrinsicHeight: photo.renderHeight
+        containIntrinsicHeight: photo.renderHeight,
       }}
     >
       <Link
@@ -35,6 +35,9 @@ function PhotoCard({ photo, showPlaceholder }: PhotoCardProps) {
           width={renderWidth}
           src={renderSrc}
         />
+        <Overlay className="overlay">
+          <OverlayText>View Details</OverlayText>
+        </Overlay>
       </Link>
     </Card>
   );
@@ -51,6 +54,10 @@ const Card = styled.div`
     will-change: transform, opacity;
     transition: opacity 0.15s ease;
   }
+
+  &:hover .overlay {
+    opacity: 1;
+  }
 `;
 
 const PlaceholderCard = styled.div`
@@ -59,5 +66,29 @@ const PlaceholderCard = styled.div`
     background: "#f0f0f0",
     borderRadius: 4,
     marginBottom: 16,
+`;
+
+const Overlay = styled.div`
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+
+  &.overlay {
+    pointer-events: auto;
+  }
+`;
+const OverlayText = styled.span`
+  color: white;
+  font-size: 0.9rem;
+  font-weight: 600;
+  background: rgba(0, 0, 0, 0.6);
+  padding: 6px 12px;
+  border-radius: 4px;
 `;
 export default memo(PhotoCard);

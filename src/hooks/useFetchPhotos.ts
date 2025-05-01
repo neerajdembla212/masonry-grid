@@ -49,16 +49,5 @@ export const useFetchPhotos = (perPage: number = 15) => {
     }
   }, []);
 
-  const decrementPage = useCallback((count: number = 1) => {
-    if (!isFetchingRef.current) {
-      setPage((prevPage) => {
-        if (prevPage > 0) {
-          return prevPage - count;
-        }
-        return prevPage;
-      });
-    }
-  }, []);
-
   return { photos, incrementPage, page };
 };
