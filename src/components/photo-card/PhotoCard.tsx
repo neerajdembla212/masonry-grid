@@ -7,15 +7,22 @@ import { memo } from "react";
 
 interface PhotoCardProps {
   photo: PositionedPhoto;
+  showPlaceholder?: boolean;
 }
 
-function PhotoCard({ photo }: PhotoCardProps) {
+function PhotoCard({ photo, showPlaceholder }: PhotoCardProps) {
   const { renderHeight, renderWidth, renderSrc, ...rest } = photo;
+
+  if (showPlaceholder) {
+    return <PlaceholderCard />;
+  }
+
   return (
     <Card
       style={{
         top: photo.top,
         left: photo.left,
+        containIntrinsicHeight: photo.renderHeight
       }}
     >
       <Link
@@ -36,6 +43,7 @@ function PhotoCard({ photo }: PhotoCardProps) {
 const Card = styled.div`
   position: absolute;
   background-color: ${(props) => props.theme.surfaceBackground};
+  content-visibility: auto;
 
   .photo-card-image {
     object-fit: cover;
@@ -45,4 +53,11 @@ const Card = styled.div`
   }
 `;
 
+const PlaceholderCard = styled.div`
+    width: 200,
+    height: 250,
+    background: "#f0f0f0",
+    borderRadius: 4,
+    marginBottom: 16,
+`;
 export default memo(PhotoCard);

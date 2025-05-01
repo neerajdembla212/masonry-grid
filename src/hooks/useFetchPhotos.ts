@@ -1,14 +1,22 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Photo } from "../types/photo";
 import { fetchPexelsPhotos } from "../services/pexelsApi";
 import { useLatest } from "./useLatest";
 
 export const useFetchPhotos = () => {
   const [photos, setPhotos] = useState<Photo[]>([]);
-  const [page, setPage] = useState(0);
+  const [page, setPage] = useState(1);
   const [isFetching, setIsFetching] = useState(false);
   const isFetchingRef = useLatest(isFetching);
-  const directionRef = useRef<"next" | "prev">("next");
+
+  // we are keeping track of all the photo ids to remove any duplicate photos coming from pexels api (noticed this in page 8 and 9 there are some photos that are returned by pexel which are exactly same, this causes flickering in masonry)
+  const availablePhotoIds = useMemo(() => {
+    const map = new Map<string, boolean>();
+    for (const photo of photos) {
+      map.set(photo.id, true);
+    }
+    return map;
+  }, [photos]);
 
   useEffect(() => {
     let ignore = false; // using ignore for race conditions (if any)
@@ -18,12 +26,11 @@ export const useFetchPhotos = () => {
       const fetchedPhotos = await fetchPexelsPhotos({
         page,
       });
-      if (!ignore && fetchedPhotos) {
-        if (directionRef.current === "prev") {
-          setPhotos((photos) => [...fetchedPhotos, ...photos]);
-        } else {
-          setPhotos((photos) => [...photos, ...fetchedPhotos]);
-        }
+      if (!ignore && Array.isArray(fetchedPhotos)) {
+        const uniqueFetchedPhotos = fetchedPhotos.filter(
+          (fetchedPhoto) => !availablePhotoIds.get(fetchedPhoto.id)
+        );
+        setPhotos((photos) => [...photos, ...uniqueFetchedPhotos]);
       }
       setIsFetching(false);
     }
@@ -37,14 +44,12 @@ export const useFetchPhotos = () => {
 
   const incrementPage = useCallback((count: number = 1) => {
     if (!isFetchingRef.current) {
-      directionRef.current = "next";
       setPage((p) => p + count);
     }
   }, []);
 
   const decrementPage = useCallback((count: number = 1) => {
     if (!isFetchingRef.current) {
-      directionRef.current = "prev";
       setPage((prevPage) => {
         if (prevPage > 0) {
           return prevPage - count;
@@ -54,5 +59,5 @@ export const useFetchPhotos = () => {
     }
   }, []);
 
-  return { photos, incrementPage, decrementPage, page };
+  return { photos, incrementPage, page };
 };

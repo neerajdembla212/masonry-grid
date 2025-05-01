@@ -7,6 +7,7 @@ import {
   useState,
   useLayoutEffect,
   useEffect,
+  useCallback,
 } from "react";
 import { getMasonryColumnCount } from "../../lib/utils";
 import { useResizeObserver } from "../../hooks/useResizeObserver";
@@ -14,18 +15,17 @@ import debounce from "lodash.debounce";
 import throttle from "lodash.throttle";
 import { PHOTO_VISIBLE_RATIO } from "../../config/config";
 import { useCalculateMasonryGridLayout } from "../../hooks/useCalculateMasonryGridLayout";
+import { SkeletonCard } from "../skeleton-card/SkeletonCard";
 
 interface MasonryGridProps {
   photos: Photo[];
   onReachEnd?: () => void;
-  onReachStart?: () => void;
   gutter?: number;
 }
 
 export default function MasonryGrid({
   photos,
   onReachEnd,
-  onReachStart,
   gutter = 16,
 }: MasonryGridProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -33,6 +33,8 @@ export default function MasonryGrid({
   const [scrollTop, setScrollTop] = useState(0);
   const [viewportHeight, setViewPortHeight] = useState(0);
   const prevScrollTopRef = useRef(0);
+  const scrollTopRef = useRef(0);
+  const viewportHeightRef = useRef(0);
 
   // calculate container width based on screen size
   const { width: containerWidth } =
@@ -62,9 +64,11 @@ export default function MasonryGrid({
   // once we have calculations for all photos in positioned photos, we decide the virtual rendering window based on these calculations
 
   const visiblePhotos = useMemo(() => {
-    const buffer = Math.floor(0.3 * viewportHeight);
-    const visibleStart = scrollTop - buffer;
-    const visibleEnd = scrollTop + viewportHeight + buffer;
+    if (!viewportHeight || !allPositionedPhotos.length) return [];
+
+    const buffer = Math.max(viewportHeight, 1000);
+    const visibleStart = scrollTopRef.current - buffer;
+    const visibleEnd = scrollTopRef.current + viewportHeight * 2 + buffer;
 
     return allPositionedPhotos.filter((photo) => {
       const allowedPhotoHeightInWindow = Math.floor(
@@ -76,16 +80,25 @@ export default function MasonryGrid({
         photoOffsetInWindow >= visibleStart && photoOffsetInWindow <= visibleEnd
       );
     });
-  }, [allPositionedPhotos, scrollTop, viewportHeight]);
+  }, [allPositionedPhotos.length, scrollTop, viewportHeight]);
 
-  const handleScroll = useMemo(
+  const updateScrollState = useMemo(
     () =>
-      throttle((event: React.UIEvent<HTMLDivElement>) => {
-        const scrollElement = event.currentTarget;
-        setScrollTop(scrollElement.scrollTop);
-        setViewPortHeight(scrollElement.clientHeight);
-      }, 50),
+      throttle(() => {
+        setScrollTop(scrollTopRef.current);
+        setViewPortHeight(viewportHeightRef.current);
+      }, 100),
     []
+  );
+
+  const handleScroll = useCallback(
+    (event: React.UIEvent<HTMLDivElement>) => {
+      const scrollElement = event.currentTarget;
+      scrollTopRef.current = scrollElement.scrollTop;
+      viewportHeightRef.current = scrollElement.clientHeight;
+      updateScrollState();
+    },
+    [updateScrollState]
   );
 
   // Until now the virtual rendering, re-calculation on scroll is ready, now we detect onReachEnd during scroll and fetch more photos
@@ -95,60 +108,41 @@ export default function MasonryGrid({
     }, 300)
   ).current;
 
-  const debouncedOnReachStart = useRef(
-    debounce(() => {
-      onReachStart?.();
-    }, 300)
-  ).current;
-
-  // detect bottom and top reached
+  // detect id user scroll is near bottom
   useEffect(() => {
     if (!viewportHeight || !totalHeight) {
       return;
     }
-    const scrollBottom = scrollTop + viewportHeight;
+    const scrollBottom = scrollTopRef.current + viewportHeight * 2;
     const threshold = Math.floor(0.3 * viewportHeight);
 
     const prevScrollTop = prevScrollTopRef.current;
 
-    const isScrollingDown = scrollTop > prevScrollTop;
-    const isScrollingUp = scrollTop < prevScrollTop;
+    const isScrollingDown = scrollTopRef.current > prevScrollTop;
 
     const nearBottom = scrollBottom + threshold >= totalHeight;
-    const nearTop = scrollTop < threshold;
 
-    prevScrollTopRef.current = scrollTop;
+    prevScrollTopRef.current = scrollTopRef.current;
 
     if (isScrollingDown && nearBottom) {
       debouncedOnReachEnd?.();
     }
-    if (isScrollingUp && nearTop) {
-      debouncedOnReachStart?.();
-    }
-  }, [
-    scrollTop,
-    viewportHeight,
-    totalHeight,
-    debouncedOnReachEnd,
-    debouncedOnReachStart,
-  ]);
+  }, [scrollTop, viewportHeight, totalHeight, debouncedOnReachEnd]);
 
   return (
     <GridScrollWrapper ref={scrollContainerRef} onScroll={handleScroll}>
-      <div style={{ position: "fixed", zIndex: 10, color: "red" }}>
-        viewportHeight: {viewportHeight} , gridColumnCount: {gridColumnCount} ,
-        scrollTop: {scrollTop} , containerHeight: {containerWidth} ,
-        containerWidth: {containerWidth} , totalHeight: {totalHeight} ,
-        bottomThreshold: {0.2 * containerWidth}, topThreshold:
-        {0.2 * containerWidth}, scrollBottomOffset:
-        {scrollTop + viewportHeight}
-      </div>
-      <Gridwrapper ref={containerRef} style={{ height: totalHeight }}>
-        <ScrollTop
-          style={{
-            top: scrollTop,
-          }}
-        />
+      <Gridwrapper
+        ref={containerRef}
+        style={{ height: totalHeight || "100vh", minHeight: "100vh" }}
+      >
+        {totalHeight === 0 &&
+          [...new Array(10)].map((_, i) => (
+            <SkeletonCard
+              key={`skeleton-${i}`}
+              width={250}
+              height={200 + i * 10}
+            />
+          ))}
         {visiblePhotos.map((photo) => (
           <PhotoCard key={photo.id} photo={photo} />
         ))}
@@ -160,16 +154,9 @@ export default function MasonryGrid({
 const Gridwrapper = styled.div`
   position: relative;
   width: 100%;
+  min-height: 80vh;
 `;
 const GridScrollWrapper = styled.div`
   height: 100vh;
   overflow-y: auto;
-`;
-
-const ScrollTop = styled.div`
-  height: 1px;
-  width: 100%;
-  border: 1px solid;
-  position: fixed;
-  z-index: 10;
 `;
