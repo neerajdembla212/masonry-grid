@@ -1,9 +1,9 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Photo } from "../types/photo";
 import { fetchPexelsPhotos } from "../services/pexelsApi";
 import { useLatest } from "./useLatest";
 
-export const useFetchPhotos = () => {
+export const useFetchPhotos = (perPage: number = 15) => {
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [page, setPage] = useState(1);
   const [isFetching, setIsFetching] = useState(false);
@@ -25,6 +25,7 @@ export const useFetchPhotos = () => {
       setIsFetching(true);
       const fetchedPhotos = await fetchPexelsPhotos({
         page,
+        per_page: perPage,
       });
       if (!ignore && Array.isArray(fetchedPhotos)) {
         const uniqueFetchedPhotos = fetchedPhotos.filter(

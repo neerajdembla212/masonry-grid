@@ -4,7 +4,7 @@ export const theme = {
   textSecondary: "#555",
   headerBackground: "#222",
   headerText: "#fff",
-  footerBackground: "#eee",
+  surfacePrimary: "#ccc",
   surfaceBackground: "#fff",
   fontFamily: `'Helvetica Neue', Helvetica, Arial, sans-serif`,
 };

@@ -28,7 +28,6 @@ export default function MasonryGrid({
   onReachEnd,
   gutter = 16,
 }: MasonryGridProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [scrollTop, setScrollTop] = useState(0);
   const [viewportHeight, setViewPortHeight] = useState(0);
@@ -68,7 +67,7 @@ export default function MasonryGrid({
 
     const buffer = Math.max(viewportHeight, 1000);
     const visibleStart = scrollTopRef.current - buffer;
-    const visibleEnd = scrollTopRef.current + viewportHeight * 2 + buffer;
+    const visibleEnd = scrollTopRef.current + viewportHeight + buffer;
 
     return allPositionedPhotos.filter((photo) => {
       const allowedPhotoHeightInWindow = Math.floor(
@@ -113,7 +112,7 @@ export default function MasonryGrid({
     if (!viewportHeight || !totalHeight) {
       return;
     }
-    const scrollBottom = scrollTopRef.current + viewportHeight * 2;
+    const scrollBottom = scrollTopRef.current + viewportHeight;
     const threshold = Math.floor(0.3 * viewportHeight);
 
     const prevScrollTop = prevScrollTopRef.current;
@@ -132,7 +131,6 @@ export default function MasonryGrid({
   return (
     <GridScrollWrapper ref={scrollContainerRef} onScroll={handleScroll}>
       <Gridwrapper
-        ref={containerRef}
         style={{ height: totalHeight || "100vh", minHeight: "100vh" }}
       >
         {totalHeight === 0 &&

@@ -2,7 +2,7 @@ import styled from "styled-components";
 import { PositionedPhoto } from "../../types/photo";
 import { Link } from "react-router-dom";
 import { routes } from "../../routes/routes";
-import Image from "../image/Image";
+import Image from "../ui/image/Image";
 import { memo } from "react";
 
 interface PhotoCardProps {

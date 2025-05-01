@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { DEFAULT_FALLBACK_PHOTO } from "../../config/config";
-import { Photo } from "../../types/photo";
+import { DEFAULT_FALLBACK_PHOTO } from "../../../config/config";
+import { Photo } from "../../../types/photo";
 import { styled } from "styled-components";
 
 export default function Image({ ...rest }: Photo) {
