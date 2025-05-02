@@ -1,6 +1,6 @@
 import styled from "styled-components";
 import { useFetchPhotoDetails } from "../../hooks/useFetchPhotoDetail";
-import Image from "../ui/image/Image";
+import Image from "../common/image/Image";
 import { useMemo, useRef } from "react";
 import { useResizeObserver } from "../../hooks/useResizeObserver";
 import { extractSizeFromPexelsUrl } from "../../lib/utils";

@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import TextInput from "../ui/text-input/TextInput";
+import TextInput from "../common/text-input/TextInput";
 
 export default function GridHeader() {
   return (

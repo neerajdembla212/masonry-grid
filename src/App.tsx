@@ -5,6 +5,7 @@ import { ThemeProvider } from "styled-components";
 import { theme } from "./styles/theme";
 import GlobalStyle from "./styles/GlobalStyle";
 import Layout from "./components/Layout";
+import ErrorBoundary from "./components/common/error-boundary/ErrorBoundary";
 
 const Gallery = lazy(() => import("./pages/Gallery"));
 const Detail = lazy(() => import("./pages/Detail"));
@@ -17,11 +18,13 @@ function App() {
       <Router>
         <Layout>
           <Suspense fallback={<div>Loading page...</div>}>
-            <Routes>
-              <Route path={routes.home} element={<Gallery />}></Route>
-              <Route path={routes.photoDetail} element={<Detail />}></Route>
-              <Route path={routes.notFound} element={<NotFound />}></Route>
-            </Routes>
+            <ErrorBoundary>
+              <Routes>
+                <Route path={routes.home} element={<Gallery />}></Route>
+                <Route path={routes.photoDetail} element={<Detail />}></Route>
+                <Route path={routes.notFound} element={<NotFound />}></Route>
+              </Routes>
+            </ErrorBoundary>
           </Suspense>
         </Layout>
       </Router>
