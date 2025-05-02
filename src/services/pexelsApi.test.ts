@@ -27,13 +27,19 @@ describe("fetchPexelsPhotos", () => {
     const result = await fetchPexelsPhotos();
 
     expect(HttpModule.http.get).toHaveBeenCalledTimes(1);
-    expect(HttpModule.http.get).toHaveBeenCalledWith("curated");
+    expect(HttpModule.http.get).toHaveBeenCalledWith("curated", {
+      queryParams: undefined,
+    });
     expect(result).toEqual(mockPhotos);
   });
 
   it("should throw an error if API call fails", async () => {
-    (HttpModule.http.get as Mock).mockRejectedValue(new Error("Internal Server Error"));
+    (HttpModule.http.get as Mock).mockRejectedValue(
+      new Error("Internal Server Error")
+    );
 
-    await expect(fetchPexelsPhotos()).rejects.toThrow("Api Error: Pexels get photos error");
+    await expect(fetchPexelsPhotos()).rejects.toThrow(
+      "Api Error: Pexels get photos error"
+    );
   });
 });

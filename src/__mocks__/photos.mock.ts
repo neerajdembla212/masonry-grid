@@ -9,14 +9,16 @@ export const mockPhotos: Photo[] = [
     height: 4000,
     width: 6000,
     loading: "lazy",
+    avg_color: "blue"
   },
   {
     id: "6789",
-    src: "https://images.pexels.com/photos/12345/pexels-original-6789.jpeg",
+    src: "https://images.pexels.com/photos/6789/pexels-original-6789.jpeg",
     alt: "Test Photo",
     photographer: "Test Photograper",
-    height: 300,
-    width: 600,
+    height: 3000,
+    width: 6000,
     loading: "lazy",
+    avg_color: "red"
   },
 ];
