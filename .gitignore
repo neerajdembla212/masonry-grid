@@ -2,6 +2,8 @@ node_modules
 dist
 dist-ssr
 .env
+build-stats.html
+stats.html
 
 # Editor directories and files
 .vscode/*

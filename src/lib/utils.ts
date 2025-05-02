@@ -1,3 +1,7 @@
+// preload utility
+export const preloadGallery = () => import("../pages/Gallery");
+export const preloadDetail = () => import("../pages/Detail");
+
 export const getMasonryColumnCount = (containerWidth: number): number => {
   if (!containerWidth) {
     return 0;
@@ -27,6 +31,17 @@ export const extractSizeFromPexelsUrl = (
   };
 };
 
-// preload utility
-export const preloadGallery = () => import("../pages/Gallery");
-export const preloadDetail = () => import("../pages/Detail");
+export const generateSrcSet = (src: string) => {
+  if (!src) {
+    return "";
+  }
+  const { width, height } = extractSizeFromPexelsUrl(src);
+  if (!width || !height) {
+    return "";
+  }
+  return [
+    `${buildImageUrl(src, height, width)} 1x`,
+    `${buildImageUrl(src, height * 2, width * 2)} 2x`,
+    `${buildImageUrl(src, height * 3, width * 3)} 3x`,
+  ].join(',');
+};
