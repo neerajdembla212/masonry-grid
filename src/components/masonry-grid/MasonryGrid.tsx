@@ -16,6 +16,7 @@ import throttle from "lodash.throttle";
 import { PHOTO_VISIBLE_RATIO } from "../../config/config";
 import { useCalculateMasonryGridLayout } from "../../hooks/useCalculateMasonryGridLayout";
 import { SkeletonCard } from "../skeleton-card/SkeletonCard";
+import { useLatest } from "../../hooks/useLatest";
 
 interface MasonryGridProps {
   photos: Photo[];
@@ -101,19 +102,25 @@ export default function MasonryGrid({
   );
 
   // Until now the virtual rendering, re-calculation on scroll is ready, now we detect onReachEnd during scroll and fetch more photos
-  const debouncedOnReachEnd = useRef(
-    debounce(() => {
-      onReachEnd?.();
-    }, 300)
-  ).current;
+  const latestOnReachEnd = useLatest(onReachEnd);
+
+  const debouncedOnReachEnd = useMemo(() => {
+    return debounce(
+      () => {
+        latestOnReachEnd.current?.();
+      },
+      300,
+      { leading: true, trailing: false }
+    );
+  }, []);
 
   // detect id user scroll is near bottom
   useEffect(() => {
-    if (!viewportHeight || !totalHeight) {
+    if (!viewportHeightRef.current || !totalHeight) {
       return;
     }
-    const scrollBottom = scrollTopRef.current + viewportHeight;
-    const threshold = Math.floor(0.3 * viewportHeight);
+    const scrollBottom = scrollTopRef.current + viewportHeightRef.current;
+    const threshold = Math.floor(0.3 * viewportHeightRef.current);
 
     const prevScrollTop = prevScrollTopRef.current;
 
