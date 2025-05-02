@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach } from "vitest";
 import { useCalculateMasonryGridLayout } from "./useCalculateMasonryGridLayout";
 import { renderHook } from "@testing-library/react";
 import { Photo } from "../types/photo";
+import { mockPhotos } from "../__mocks__/photos.mock";
 
 describe("useCalculateMasonryGridLayout", () => {
   let photos: Photo[];
@@ -13,11 +14,8 @@ describe("useCalculateMasonryGridLayout", () => {
     containerWidth = 1000;
     columnCount = 3;
     gutter = 16;
-    photos = [
-      { id: "1", width: 600, height: 400, src: "", alt: "", photographer: "" },
-      { id: "2", width: 300, height: 300, src: "", alt: "", photographer: "" },
-      { id: "3", width: 400, height: 500, src: "", alt: "", photographer: "" },
-    ];
+    mockPhotos
+    photos = mockPhotos;
   });
 
   it("Calculates positioned photos correctly", () => {
