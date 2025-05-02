@@ -14,5 +14,6 @@ export const mapPexelsPhoto = (
     height: photo.height,
     width: photo.width,
     loading: "lazy",
+    avg_color: photo.avg_color,
   };
 };

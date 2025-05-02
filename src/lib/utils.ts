@@ -26,3 +26,7 @@ export const extractSizeFromPexelsUrl = (
     width: widthMatch ? parseInt(widthMatch[1], 10) : undefined,
   };
 };
+
+// preload utility
+export const preloadGallery = () => import("../pages/Gallery");
+export const preloadDetail = () => import("../pages/Detail");

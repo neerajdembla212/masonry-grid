@@ -6,6 +6,7 @@ import { useResizeObserver } from "../../hooks/useResizeObserver";
 import { extractSizeFromPexelsUrl } from "../../lib/utils";
 import { Photo } from "../../types/photo";
 import { useNavigate } from "react-router-dom";
+import { preloadGallery } from "../../lib/utils";
 
 export default function PhotoDetailContainer({ id }: { id: string }) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -27,6 +28,8 @@ export default function PhotoDetailContainer({ id }: { id: string }) {
       ...photo,
       height: renderedHeight,
       width: renderedWidth,
+      loading: "eager",
+      alt: photo.alt || `A photo captured with love by ${photo.photographer}`,
     };
   }, [containerHeight, photo]);
 
@@ -40,12 +43,14 @@ export default function PhotoDetailContainer({ id }: { id: string }) {
               height: updatedPhoto.height,
             }}
           >
-            <Image {...updatedPhoto} />
+            <Image {...updatedPhoto} fetchPriority="high" />
           </div>
           <DetailsContainer>
             <TextLine>Photo Credits: {updatedPhoto.photographer}</TextLine>
             <TextLine>You are enjoying "{updatedPhoto.alt}"</TextLine>
-            <button onClick={() => navigate(-1)}>Back to Gallery</button>
+            <button onClick={() => navigate(-1)} onMouseEnter={preloadGallery}>
+              Back to Gallery
+            </button>
           </DetailsContainer>
         </>
       )}

@@ -21,13 +21,6 @@ const LayoutWrapper = styled.div`
   min-height: 100dvh;
 `;
 
-const Header = styled.header`
-  padding: 1rem;
-  background: var(--header-background);
-  color: var(--header-text);
-  text-align: center;
-`;
-
 const Main = styled.main`
   padding: 2rem;
   flex: 1;

@@ -4,18 +4,14 @@ import { Link } from "react-router-dom";
 import { routes } from "../../routes/routes";
 import Image from "../ui/image/Image";
 import { memo } from "react";
+import { preloadDetail } from "../../lib/utils";
 
 interface PhotoCardProps {
   photo: PositionedPhoto;
-  showPlaceholder?: boolean;
 }
 
-function PhotoCard({ photo, showPlaceholder }: PhotoCardProps) {
-  const { renderHeight, renderWidth, renderSrc, ...rest } = photo;
-
-  if (showPlaceholder) {
-    return <PlaceholderCard />;
-  }
+function PhotoCard({ photo }: PhotoCardProps) {
+  const { renderHeight, renderWidth, renderSrc, avg_color, ...rest } = photo;
 
   return (
     <Card
@@ -34,8 +30,9 @@ function PhotoCard({ photo, showPlaceholder }: PhotoCardProps) {
           height={renderHeight}
           width={renderWidth}
           src={renderSrc}
+          avg_color={avg_color}
         />
-        <Overlay className="overlay">
+        <Overlay className="overlay" onMouseEnter={preloadDetail}>
           <OverlayText>View Details</OverlayText>
         </Overlay>
       </Link>
@@ -58,14 +55,6 @@ const Card = styled.div`
   &:hover .overlay {
     opacity: 1;
   }
-`;
-
-const PlaceholderCard = styled.div`
-    width: 200,
-    height: 250,
-    background: "#f0f0f0",
-    borderRadius: 4,
-    marginBottom: 16,
 `;
 
 const Overlay = styled.div`
