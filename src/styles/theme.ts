@@ -6,6 +6,7 @@ export const theme = {
   headerText: "#fff",
   surfacePrimary: "#ccc",
   surfaceBackground: "#fff",
+  surfacePrimaryHover: "#333",
   fontFamily: `'Helvetica Neue', Helvetica, Arial, sans-serif`,
 };
 

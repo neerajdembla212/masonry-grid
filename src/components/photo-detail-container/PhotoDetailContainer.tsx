@@ -43,14 +43,24 @@ export default function PhotoDetailContainer({ id }: { id: string }) {
               height: updatedPhoto.height,
             }}
           >
-            <Image {...updatedPhoto} fetchPriority="high" />
+            <ImageWrapper
+              style={{
+                width: updatedPhoto.width,
+                height: updatedPhoto.height,
+              }}
+            >
+              <Image {...updatedPhoto} fetchPriority="high" />
+            </ImageWrapper>
           </div>
           <DetailsContainer>
             <TextLine>Photo Credits: {updatedPhoto.photographer}</TextLine>
             <TextLine>You are enjoying "{updatedPhoto.alt}"</TextLine>
-            <button onClick={() => navigate(-1)} onMouseEnter={preloadGallery}>
+            <BackButton
+              onClick={() => navigate(-1)}
+              onMouseEnter={preloadGallery}
+            >
               Back to Gallery
-            </button>
+            </BackButton>
           </DetailsContainer>
         </>
       )}
@@ -60,16 +70,58 @@ export default function PhotoDetailContainer({ id }: { id: string }) {
 
 const Container = styled.div`
   display: flex;
+  flex-direction: row;
+  gap: 2rem;
+  padding: 2rem;
   height: 100dvh;
-  width: 75dvw;
-  justify-content: space-around;
+  width: 100%;
+  box-sizing: border-box;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    padding: 1rem;
+  }
+`;
+
+const ImageWrapper = styled.div`
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    object-fit: contain;
+  }
 `;
 
 const DetailsContainer = styled.div`
+  flex: 1;
   display: flex;
   flex-direction: column;
+  gap: 1rem;
+  max-width: 500px;
+  word-wrap: break-word;
 `;
 
 const TextLine = styled.div`
-  margin-bottom: 1rem;
+  font-size: 1.1rem;
+  line-height: 1.4;
+`;
+
+const BackButton = styled.button`
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  background-color: ${(props) => props.theme.surfacePrimary ?? "#444"};
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  align-self: start;
+
+  &:hover {
+    background-color: ${(props) => props.theme.surfacePrimaryHover ?? "#333"};
+  }
 `;
