@@ -42,7 +42,7 @@ This application uses multiple techniques for optimizing performance and smooth 
 - ### Minimize void gaps in grid
     While user scrolls and more photos get loaded, a photo gets qualified to make in the sliding window if 50% of the photo enters the sliding window, this number is configurable via `PHOTO_VISIBLE_RATIO` constant in config.
 
-    To avoid display of empty white space in the grid the number of images fetched are calculated as per the container width. This makes sure if grid does justice to the space available to render the images.
+    To avoid display of empty white space in the grid the number of images fetched are calculated as per the container width. This ensures the grid uses available space efficiently.
 - ### Smooth Scrolling
     The users current scroll position is stored in component local state, to ensure the scrolling feels "smooth", the on scroll event handler is throttled by 100ms, which implies that when user scrolls the scroll position will get updated in state ~10 times per second (max).
 
@@ -57,7 +57,7 @@ This application uses multiple techniques for optimizing performance and smooth 
     Following are some strategies used for bundle optimisation: 
     - Routes in the app are lazy loaded to make sure separate bundle is created for each page. 
     - When user hovers on an image in the grid the photo detail route bundle is preloaded to for fast route transition
-    - Brottli compression is used for JS files
+    - Brotli compression is used for JS files
     - Manual chunking for `react-router-dom` is done since this is a shared bundle between all routes, this helps keeping the application bundle pure and small, also enables browsers to cache react-router bundle for re-use in multiple lazy loaded routes
     - Babel plugin is used reduce the bundle size of styled component by tree shaking unused styles, it also adds component names for better debugging.
 
