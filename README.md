@@ -1,14 +1,16 @@
 # Masonry Grid in React JS
 
-This project implements the masonry grid layout in React JS without using any third party library for layouting
+This is a performance-optimized photo gallery built using React, TypeScript, and the Pexels API. It features a fully responsive, virtualized masonry grid and supports smooth transitions to detailed photo views. The app is built from the ground up without external layout libraries and emphasizes bundle size, UX performance, and strong typing.
+
 
 ## Key Features
 
-- Responsiveness across all devices and screen widths
+- Responsive, virtualized masonry grid using **custom layout logic** (no external libraries)
 - The masonry grid is virtualised to display photos in user's scrolling window
 - The application is Strongly typed including separate types for api response and application DTO
 - Optimized image loading
 - The images layed out in masonry format are fetched from Pexels api
+- Optimized bundle with **code splitting**, **Brotli compression**, and **manual chunking**
 
 
 ## Steps to run
@@ -27,6 +29,9 @@ On page load the layout of masonry grid gets calculated based on the container w
 
 ### Virtualization
 The virtualization is implemented by creating a sliding window based on viewport height and scroll offset, photos are filtered during user scrolls based on if they fall within the sliding window, this filtering happens everytime user scrolls
+
+### Error Handling
+The app uses custom error boundaries to catch and gracefully handle unexpected runtime errors. Each route (Gallery and Photo Detail) is wrapped in an error boundary, ensuring the app remains stable even if individual views fail to load or render.
 
 ### Optimization
 

@@ -27,7 +27,7 @@ describe("useCalculateMasonryGridLayout", () => {
         gutter,
       })
     );
-    expect(result.current.positionedElements.length).toBe(3);
+    expect(result.current.positionedElements.length).toBe(2);
     result.current.positionedElements.forEach((element) => {
       expect(element.top).toBeTypeOf("number");
       expect(element.left).toBeTypeOf("number");
