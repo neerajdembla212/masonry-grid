@@ -51,13 +51,29 @@ This application uses multiple techniques for optimizing performance and smooth 
     When user scrolls to near bottom of the page (or viewport height) the api call is fired to fetch the next page, in order to avoid spamming multiple api calls the function is debounced by 300ms. Furthermore the api call function is received as a prop to the grid, in order to make sure component uses the latest function without unnecessary re-renders the function is stored in a ref.
 
 - ### Image optimization
-    The layout calculation logic also calculates the exact width and height for each image to be rendered in masonry grid and also builds the image url using these numbers to make sure images with correct height is rendered based on container width. The url is further used to generate correct `srcSet` for browsers to choose optimal image size.
+    - The layout calculation logic also calculates the exact width and height for each image to be rendered in masonry grid and also builds the image url using these numbers to make sure images with correct height is rendered based on container width. 
+    - The image src is further used to generate correct `srcSet` for browsers to choose optimal image size. 
+    - The image used in photo details page has high fetch priority set and is loaded eagerly.
+    - All the images in the application uses a solid average color of the image to show a loading state and once the image is available the solid color smoothly transitions into the image.
+    - Images have set decoding async so that browser gets to focus on rendering instead of waiting to decode images syncronously
 
 - ### Bundle size
     Following are some strategies used for bundle optimisation: 
     - Routes in the app are lazy loaded to make sure separate bundle is created for each page. 
-    - When user hovers on an image in the grid the photo detail route bundle is preloaded to for fast route transition
     - Brotli compression is used for JS files
     - Manual chunking for `react-router-dom` is done since this is a shared bundle between all routes, this helps keeping the application bundle pure and small, also enables browsers to cache react-router bundle for re-use in multiple lazy loaded routes
     - Babel plugin is used reduce the bundle size of styled component by tree shaking unused styles, it also adds component names for better debugging.
 
+- ### Preloads
+    - When user hovers on an image in the grid the photo detail route bundle is preloaded to for fast route transition and is cached by the browser, this helps us reduce the transition time between pages, same feature is implemented from details page to gallery
+
+
+## Design decisions
+- The decision of calculating the layout and positioning each image in the grid instead of using a css solution to render the grid was taken so that app has more control on each image to implement more controled virtualisation. By knowing the exact size and position of each image before rendering the app has 0 CLS
+
+## Possible improvements
+- The application currently uses client side rendering, we can gain performance benefits by loading the initial page on server side, that also would give us opportunity to preload the images in initial document.
+- Styled components bundle can be further fine-tuned to reduce the contribution of styled components in final bundle size, moreover alternative CSS in JS solutions could also give us same feature in less bundle size.
+- When user navigates back to gallery from details page we can restore the calculations and scroll state so that user can continue their experience from exact same spot.
+- The calculations are cached in memory storing id -> Photo with layout attributes. This can be further improved by adding a cache key (default-grid, search-{query_param}), so that the cache can be re-used for multiple contexts such as search results (in future, when we implement it).
+- For debounce and throttle we are using lodash, if we add custom utility functions instead, it will help remove lodash from the bundle, resulting in even smaller size.
