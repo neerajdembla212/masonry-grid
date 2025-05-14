@@ -6,8 +6,8 @@ import { theme } from "./styles/theme";
 import GlobalStyle from "./styles/GlobalStyle";
 import Layout from "./components/Layout";
 import ErrorBoundary from "./components/common/error-boundary/ErrorBoundary";
+import Gallery from "./pages/Gallery";
 
-const Gallery = lazy(() => import("./pages/Gallery"));
 const Detail = lazy(() => import("./pages/Detail"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 

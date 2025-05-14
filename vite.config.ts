@@ -26,15 +26,15 @@ export default defineConfig({
       ext: '.br',
     }),
   ],
-  server: {
-    proxy: {
-      "/api": {
-        target: "https://api.pexels.com/v1",
-        changeOrigin: true,
-        rewrite: (path: string) => path.replace(/^\/api/, ""),
-      },
-    },
-  },
+  // server: {
+  //   proxy: {
+  //     "/api": {
+  //       target: "https://api.pexels.com/v1",
+  //       changeOrigin: true,
+  //       rewrite: (path: string) => path.replace(/^\/api/, ""),
+  //     },
+  //   },
+  // },
 
   test: {
     globals: true,
